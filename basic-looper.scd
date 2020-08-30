@@ -6,6 +6,13 @@ The recording status is sent as an OSC message with the structure "/cycseq/messa
 
 How to use it
 
+First you should execute the following tidal code:
+
+linput = pI "linput"
+lnr = pI "lnr"
+
+Now you can use linput and lnr as paramter
+
 The simplest form for recording is
 d1 $ s "loop" -- writes one cycle to the loop0 buffer and uses the input port 0
 
@@ -30,7 +37,6 @@ Note: I prefer to use 'trigger 1' to ensure, that the recording starts from the 
 Maybe you want to use the looper with seqP, seqPLoop, wait or a specialized editor like CycSeq.
 
 */
-
 
 var synths = ();
 var recSynth;
