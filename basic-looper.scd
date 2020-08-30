@@ -2,16 +2,16 @@
 /*
 
 This is a simple looper for TidalCycles. By default 8 buffers are created, named loop0 to loop7.
-The recording status is sent as an OSC message with the structure "/cycseq/message/looper sii name, recording status, input port"
+The recording status is sent as an OSC message with the structure "/cycseq/message/looper sii name, recording status, input port".
 
-How to use it
+# How to use it
 
 First you should execute the following tidal code:
 
 linput = pI "linput"
 lnr = pI "lnr"
 
-Now you can use linput and lnr as paramter
+Now you can use linput and lnr as parameter.
 
 The simplest form for recording is
 d1 $ s "loop" -- writes one cycle to the loop0 buffer and uses the input port 0
