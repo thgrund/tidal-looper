@@ -75,6 +75,7 @@ synths[\loopValues] = {
 synths[\addLoop] = {|bufn = "loop"|
 
 	~server.makeBundle(lat, {
+		recSynth.set(\run, 0);
 		~dirt.soundLibrary.addBuffer("loop" ++ ~lnr, recBuffers @~lnr );
 		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, false, ~linput);
     })
@@ -93,7 +94,6 @@ synths[\loop] = {
 
 	r = Routine {
 		(~delta.value).wait;
-		recSynth.set(\run, 0);
 		synths[\addLoop].value;
 	}.play;
 };
