@@ -41,7 +41,7 @@ Maybe you want to use the looper with seqP, seqPLoop, wait or a specialized edit
 var synths = ();
 var recSynth;
 var recording = false;
-var lat = s.latency - 0.1; // finetune
+var lat = s.latency; // finetune
 var maxTime = 8;
 var numBuffers = 8;
 var recBufs;
@@ -75,15 +75,15 @@ synths[\loopValues] = {
 synths[\addLoop] = {|bufn = "loop"|
 
 	~server.makeBundle(lat, {
-		recSynth.set(\run, 0);
 		~dirt.soundLibrary.addBuffer("loop" ++ ~lnr, recBuffers @~lnr );
 		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, false, ~linput);
-        recSynth.free;
     })
 };
 
 synths[\loop] = {
 	synths[\loopValues].value;
+
+	recBuffers[~lnr] =  Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value), 1);
 
     ~server.makeBundle(lat, {
 		recSynth = Synth(\buffRecord, [input: ~linput, buffer: recBuffers @ ~lnr ], ~server);
@@ -93,6 +93,7 @@ synths[\loop] = {
 
 	r = Routine {
 		(~delta.value).wait;
+		recSynth.set(\run, 0);
 		synths[\addLoop].value;
 	}.play;
 };
@@ -118,3 +119,6 @@ synths[\loopResetAll] = {
 synths.keysValuesDo{ |key, func|  ~dirt.soundLibrary.addSynth( key, (play: func)) };
 
 )
+
+
+~recBuffers
