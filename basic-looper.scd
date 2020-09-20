@@ -19,7 +19,7 @@ d1 $ s "loop" -- writes one cycle to the loop0 buffer and uses the input port 0
 After recording u can listen back to the result with
 d1 $ s "loop0"
 
-It is possible to set the length of the recording (this is equals to the length of the cycles) i.e
+It is possible to set the length of the recording (this is equals to the length of the events) i.e
 d1 $ slow 2 $ s "loop"
 
 Use lnr to choose a specific buffer. lnr 2 is equal to "write to buffer loop2".
@@ -50,7 +50,6 @@ var linput = 0;
 var lname = "l";
 var lnr = 0;
 var r;
-var cycseqOSC = NetAddr("127.0.0.1", 57121);
 var recBuffers;
 
 ~recBuffers.free;
@@ -71,13 +70,6 @@ synths[\loopValues] = {
 	if (~lnr.isNil) {~lnr = lnr};
 };
 
-synths[\addLoop] = {|bufn = "loop"|
-
-	~server.makeBundle(lat, {
-		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, false, ~linput);
-    });
-};
-
 synths[\loop] = {
 	synths[\loopValues].value;
 	recBuffers[~lnr] =  Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value), 1);
@@ -85,13 +77,7 @@ synths[\loop] = {
     ~server.makeBundle(lat, {
 		recSynth = Synth(\buffRecord, [input: ~linput, buffer: recBuffers @ ~lnr ], ~server);
 		~dirt.soundLibrary.addBuffer("loop" ++ ~lnr, recBuffers @~lnr );
-		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, true, ~linput);
     });
-
-	r = Routine {
-		(~delta.value).wait;
-		synths[\addLoop].value;
-	}.play;
 };
 
 synths[\loopDebugger] = { |out, lrec = 0|
@@ -116,5 +102,3 @@ synths.keysValuesDo{ |key, func|  ~dirt.soundLibrary.addSynth( key, (play: func)
 
 )
 
-
-~recBuffers

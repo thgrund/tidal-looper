@@ -19,7 +19,7 @@ d1 $ s "loop" -- writes one cycle to the loop0 buffer and uses the input port 0
 After recording u can listen back to the result with
 d1 $ s "loop0"
 
-It is possible to set the length of the recording (this is equals to the length of the cycles) i.e
+It is possible to set the length of the recording (this is equals to the length of the events) i.e
 d1 $ slow 2 $ s "loop"
 
 Use lnr to choose a specific buffer. lnr 2 is equal to "write to buffer loop2".
@@ -37,12 +37,11 @@ Note: I prefer to use 'trigger 1' to ensure, that the recording starts from the 
 Maybe you want to use the looper with seqP, seqPLoop, wait or a specialized editor like CycSeq.
 
 */
-
 var synths = ();
 var recSynth;
 var recording = false;
-var lat = s.latency; // finetune
-var maxTime = 8;
+var lat = s.latency - 0.1; // finetune
+var maxTime = 4;
 var numBuffers = 8;
 var recBufs;
 var lrec = 0;
@@ -75,21 +74,18 @@ synths[\loopValues] = {
 synths[\addLoop] = {|bufn = "loop"|
 
 	~server.makeBundle(lat, {
-		recSynth.set(\run, 0);
-		~dirt.soundLibrary.addBuffer("loop" ++ ~lnr, recBuffers @~lnr );
 		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, false, ~linput);
-    })
+    });
 };
 
 synths[\loop] = {
 	synths[\loopValues].value;
-
 	recBuffers[~lnr] =  Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value), 1);
 
     ~server.makeBundle(lat, {
 		recSynth = Synth(\buffRecord, [input: ~linput, buffer: recBuffers @ ~lnr ], ~server);
+		~dirt.soundLibrary.addBuffer("loop" ++ ~lnr, recBuffers @~lnr );
 		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, true, ~linput);
-
     });
 
 	r = Routine {
