@@ -21,7 +21,7 @@ The default port for exchanging osc messages is `3336`
 
 The result of all this looks like this:
 
-![hydra-example](/Users/tgrund/Development/tidalcycles/tidal-looper/feedback/hydra-example.gif)
+![hydra-example](hydra-example.gif)
 
 **References:**
 
@@ -43,7 +43,7 @@ The default port for exchanging osc messages is `57121`
 
 The result looks like this:
 
-![cycseqfeedback](/Users/tgrund/Development/tidalcycles/tidal-looper/feedback/cycseqfeedback.gif)
+![cycseqfeedback](cycseqfeedback.gif)
 
 **Reference**
 
