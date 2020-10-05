@@ -33,7 +33,7 @@ The result of all this looks like this:
 
 CycSeq represents a graphical sequencer (similar to a step sequencer) for [TidalCycles](http://pages.tidalcycles.org/getting_started.html). With this sequencer it is possible to activate written code automatically.
 
-In the file `cycles-looper.scd` on message with the address `/cycseq/message/looper` is sent. The three arguments are:
+In the file `cycseq-looper.scd` on message with the address `/cycseq/message/looper` is sent. The three arguments are:
 
 1. Buffer name (String)
 2. Record status (Boolean)
