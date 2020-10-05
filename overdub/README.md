@@ -25,7 +25,7 @@ And you should execute the SuperCollider code under `playall.scd`
 
 ## How to use it
 
-This looper differs from the basic looper type in that all samples are appended to a sample name, so you can access it with the n function.
+This looper differs from the basic looper type in that all samples are appended to a named sample bank, so you can access it with the n function.
 
 The simplest form of recording is:
 
