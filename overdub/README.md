@@ -21,7 +21,7 @@ lname = pS "lname"
 playAll = pB "playAll"
 ```
 
-And you should execute the SuperCollider code under `playall.scd`
+And you should execute the SuperCollider code under `playall.scd` to get access to the playAll effect. 
 
 ## How to use it
 
@@ -50,8 +50,6 @@ And you can specify a looper name. In this way you can switch between different 
 ```
 d1 $ s "looper" # linput "14" # lname "bubu"
 ```
-
-**Disclaimer**: the SuperCollider code under `playall.scd` for creating the `playAll` function which is described below, can only be used if you have access to the last received event in SuperDirt. A PR is been created for such a behaviour and there is a discussion under https://github.com/musikinformatik/SuperDirt/pull/209  
 
 Play them back with `playAll` - all buffers under sample name `loop` will be played immediately in parallel. In this way you can easily append a new loop and it will be played with the other loops.  No further code needs to be written for this. This simulates some kind of overdub mode.
 
