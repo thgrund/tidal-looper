@@ -3,12 +3,11 @@
 
 ~dirt.addModule('playAll', {
 	if (~playAll != 0, {
-
 		~dirt.soundLibrary.buffers[~s].size.do({
 			arg item;
 			var event = ();
-			event.putAll((\type: \dirt, \dirt: ~dirt ), ~dirt.lastEvent);
 
+			event.putAll((\type: \dirt, \dirt: ~dirt ),currentEnvironment);
 			event.removeAt(\playAll);
 
 			if (item != ~n, {
