@@ -38,6 +38,12 @@ Use n to choose a specific buffer, i.e. n "2" is equal to "write to the second b
 d1 $ s "looper" # n "<0 1 2 3 4 5 6 7>"
 ```
 
+And each buffer is accessible with the n function
+
+```
+d2 $ s "loop" # n "[0,1,2,3,4,5,6,7]"
+```
+
 You can use each input port for recording. If you use i.e. Blackhole, than the output and input ports have the same results. This way you can write the orbit results (i.e. what came from d1) to a buffer.
 
 ```
