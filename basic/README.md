@@ -20,7 +20,8 @@ The simplest form for recording is
 once $ s "looper" -- writes one cycle to the loop buffer and uses the input port 0 and the sample number 0
 ```
 
-After recording u can listen back to the result with
+In this case you should use `once`, because you would override the buffer with each cycle and therefore you never here a result.
+After recording you can listen back to the result with
 
 ```
 d1 $ s "loop"
