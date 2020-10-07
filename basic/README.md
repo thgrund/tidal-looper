@@ -58,7 +58,7 @@ once $ s "looper" # lname "bubu"
 d1 $ s "bubu"
 ```
 
-To continuously play back and record a loop, the code looks like this
+To continuously play back and record a loop, the code could looks like this
 
 ```
 d1 $ qtrigger 1 $ stack [
