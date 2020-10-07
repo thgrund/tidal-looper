@@ -71,5 +71,3 @@ synths[\freeLoops] = {
 synths.keysValuesDo{ |key, func|  ~dirt.soundLibrary.addSynth( key, (play: func)) };
 
 )
-
-~dirt.soundLibrary.buffers[\loop]
