@@ -63,7 +63,8 @@ To continuously play back and record a loop, the code looks like this
 ```
 d1 $ qtrigger 1 $ stack [
     s "looper" # n "<0 1 2 3>" # linput 14,
-    s "loop" # n "[0,1,2,3]"
+    s "loop" # n "[0,1,2,3]",
+    s "808 cp!3"
 ]
 ```
 
