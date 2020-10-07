@@ -46,13 +46,13 @@ synths[\looper] = {
     ~server.makeBundle(lat, {
 		recSynth = Synth(\buffRecord, [input: ~linput, buffer: newBuffer ], ~server);
 
-		if (~dirt.soundLibrary.buffers[\loop].at(modN).notNil,
-			{~dirt.soundLibrary.buffers[\loop].at(modN).free});
+		if (~dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).notNil,
+			{~dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free});
 
 		bufferEvent = ~dirt.soundLibrary.makeEventForBuffer(newBuffer);
 
-		~dirt.soundLibrary.buffers[\loop].put(modN, newBuffer);
-		~dirt.soundLibrary.bufferEvents[\loop].put(modN, bufferEvent);
+		~dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
+		~dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
     });
 };
 
@@ -71,3 +71,5 @@ synths[\freeLoops] = {
 synths.keysValuesDo{ |key, func|  ~dirt.soundLibrary.addSynth( key, (play: func)) };
 
 )
+
+~dirt.soundLibrary.buffers[\loop]
