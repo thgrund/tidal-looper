@@ -6,9 +6,10 @@ First you should execute the following tidal code:
 
 ```
 linput = pI "linput"
+lname = pS "lname"
 ```
 
-Now you can use `linput` and `lnr` as parameter.
+Now you can use `linput` and `lname` as parameter.
 
 ## How to use it
 
