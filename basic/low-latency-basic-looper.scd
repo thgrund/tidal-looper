@@ -9,7 +9,7 @@ var path = "~/Music/Loops/";
 
 SynthDef(\buffRecord, {|input = 0, buffer|
 	var in = SoundIn.ar(input);
-	RecordBuf.ar(in, buffer, recLevel: 1.5, loop:0, run: 1, doneAction: Done.freeSelf);
+	RecordBuf.ar(in, buffer, recLevel: 1.0, loop:0, run: 1, doneAction: Done.freeSelf);
 }).add;
 
 synths[\loopValues] = {
@@ -27,14 +27,14 @@ synths[\looper] = {
 
 	modN = ~n % numBuffers;
 
-	newBuffer = Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value));
+	newBuffer = Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value),1);
 
 	if (~dirt.soundLibrary.buffers[~lname.asSymbol].size != numBuffers, {
 		numBuffers.do({
 			// Add empty buffer to access the list element later
 			~dirt.soundLibrary.addBuffer(
 				~lname.asSymbol,
-				Buffer.alloc(~dirt.server, ~dirt.server.sampleRate),
+				Buffer.alloc(~dirt.server, ~dirt.server.sampleRate, 1),
 				true
 			);
 		});
