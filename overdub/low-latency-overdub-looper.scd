@@ -6,7 +6,6 @@ var numBuffers = 8;
 var recBufs;
 var linput = 0;
 var lname = "loop";
-var lat = s.latency - 0.1; // finetune
 
 SynthDef(\buffRecord, {|input = 0, buffer|
 	var in = SoundIn.ar(input);
@@ -25,7 +24,7 @@ synths[\looper] = {
 
 	buffer = Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value), 1);
 
-    ~dirt.server.makeBundle(lat, {
+    ~dirt.server.makeBundle(~latency + 0.05, {
 		recSynth = Synth(\buffRecord, [input: ~linput, buffer: buffer ], ~dirt.server);
 		~dirt.soundLibrary.addBuffer(~lname.asSymbol, buffer, true);
     });
