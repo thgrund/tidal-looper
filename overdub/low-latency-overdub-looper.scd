@@ -3,6 +3,7 @@ var synths = ();
 var recSynth;
 var linput = 0;
 var lname = "loop";
+var path = "~/Music/Loops/";
 
 SynthDef(\buffRecord, {|input = 0, buffer|
 	var in = SoundIn.ar(input);
@@ -30,6 +31,22 @@ synths[\looper] = {
 synths[\freeLoops] = {
 	synths[\loopValues].value;
 	~dirt.soundLibrary.freeSoundFiles(~lname.asSymbol);
+};
+
+synths[\persistLoops] = {
+	var abspath;
+
+	synths[\loopValues].value;
+
+	abspath = path.standardizePath ++ ~lname.asSymbol;
+
+	File.mkdir(abspath);
+
+	~dirt.soundLibrary.buffers[~lname.asSymbol].size.do({ |index|
+		~dirt.soundLibrary.buffers[~lname.asSymbol][index].write(
+			abspath ++ "/" + index ++ ".aiff"
+		)
+	})
 };
 
 synths.keysValuesDo{ |key, func|  ~dirt.soundLibrary.addSynth( key, (play: func)) };
