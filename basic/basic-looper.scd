@@ -2,7 +2,6 @@
 var synths = ();
 var recSynth;
 var numBuffers = 8;
-var recBufs;
 var linput = 0;
 var lname = "loop";
 var lat = s.latency - 0.1; // finetune
