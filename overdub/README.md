@@ -69,5 +69,9 @@ Use the `freeLoops` function to free all loops under a specific sample name.
 once $ s "freeLoops" # lname "loops"
 ```
 
+To persist all loop buffers of a specific buffer list just evaluate
 
+```
+once $ s "persistLoops" # lname "bubu"
+```
 
