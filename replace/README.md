@@ -78,5 +78,11 @@ To reset all loop buffers just evaluate
 once $ s "freeLoops"
 ```
 
-Note: I prefer to use 'qtrigger 1' to ensure, that the recording starts from the beginning of the pattern.
+To persist all loop buffers of a specific buffer list just evaluate
+
+```
+once $ s "persistLoops" # lname "bubu"
+```
+
+Note: I prefer to use 'qtrigger' to ensure, that the recording starts from the beginning of the pattern.
 Maybe you want to use the looper with seqP, seqPLoop or wait.
