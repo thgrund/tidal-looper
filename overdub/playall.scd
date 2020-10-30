@@ -8,7 +8,6 @@
 			var event = ();
 
 			event.putAll((\type: \dirt, \dirt: ~dirt ),currentEnvironment);
-			currentEnvironment.postln;
 			event.removeAt(\playAll);
 
 			if (item != ~n, {

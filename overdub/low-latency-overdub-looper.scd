@@ -22,7 +22,7 @@ synths[\looper] = {
 
 	buffer = Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value), 1);
 
-    ~dirt.server.makeBundle(~latency + 0.05, {
+    ~dirt.server.makeBundle(~latency + 0.01, {
 		recSynth = Synth(\buffRecord, [input: ~linput, buffer: buffer ], ~dirt.server);
 		~dirt.soundLibrary.addBuffer(~lname.asSymbol, buffer, true);
     });
