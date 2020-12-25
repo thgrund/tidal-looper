@@ -1,87 +1,134 @@
 (
 var synths = ();
 var recSynth;
-var recording = false;
-var lat = s.latency - 0.1; // finetune
-var maxTime = 4;
 var numBuffers = 8;
 var recBufs;
-var lrec = 0;
-var lpitch = 0;
 var linput = 0;
-var lname = "l";
-var lnr = 0;
-var r;
+var lname = "loop";
+var path = "~/Music/Loops/";
+var loopCalls = 0;
 var cycseqOSC = NetAddr("127.0.0.1", 57121);
-var recBuffers;
-var loopCalls;
+var latencyFineTuning = 0.04;
 
-~recBuffers.free;
-~recBuffers = recBuffers = {Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * maxTime, 1)} ! numBuffers;
+// Set the default looper mode.
+// 0.0 = replace mode
+// 1.0 = overdub mode
+var pLevel = 0.0;
 
-~recording = false;
-~loopCalls = loopCalls = 0;
-
-for(0,numBuffers-1, { |i|  ~dirt.soundLibrary.addBuffer("loop"++i, (recBuffers @ i), false )});
-
-SynthDef(\buffRecord, {|input = 0, buffer, run = 1|
+SynthDef(\buffRecord, {|input = 0, pLevel = 0.0, buffer|
 	var in = SoundIn.ar(input);
-	RecordBuf.ar(in, buffer, recLevel: 1.5, loop:0, run:run, doneAction: Done.freeSelf);
+	RecordBuf.ar(in, buffer, recLevel: 0.85, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
 }).add;
 
 synths[\loopValues] = {
-	if (~lrec.isNil) {~lrec = lrec};
-	if (~lpitch.isNil) {~lpitch = lpitch};
 	if (~linput.isNil) {~linput = linput};
 	if (~lname.isNil) {~lname = lname};
-	if (~lnr.isNil) {~lnr = lnr};
+	if (~n == \none, {~n = 0.0});
 	if (~loopCalls.isNil) {~loopCalls = loopCalls};
 };
 
-synths[\addLoop] = {|bufn = "loop"|
-	~server.makeBundle(lat, {
+synths[\sendLooperStatus] = {|bufn = "loop"|
+	if (loopCalls == ~loopCalls, {
 		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, false, ~linput);
 	});
 };
 
-synths[\loop] = {
-    loopCalls = loopCalls + 1;
+synths[\looper] = {
+	var newBuffer;
+	var modN;
+	var bufferEvent;
+
+	loopCalls = loopCalls + 1;
 
 	synths[\loopValues].value;
-	recBuffers[~lnr] =  Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value), 1);
 
-    ~server.makeBundle(lat, {
-		recSynth = Synth(\buffRecord, [input: ~linput, buffer: recBuffers @ ~lnr ], ~server);
-		~dirt.soundLibrary.addBuffer("loop" ++ ~lnr, recBuffers @~lnr );
-		~recording = true;
+	modN = ~n % numBuffers;
+
+	newBuffer = Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * (~delta.value),1);
+
+	if (~dirt.soundLibrary.buffers[~lname.asSymbol].size != numBuffers, {
+		numBuffers.do({
+			// Add empty buffer to access the list element later
+			~dirt.soundLibrary.addBuffer(
+				~lname.asSymbol,
+				Buffer.alloc(~dirt.server, 0, 1),
+				true
+			);
+		});
+	});
+
+	// Allocate new buffer with a size based on the delta value
+    ~dirt.server.makeBundle(~latency + 0.01, {
+		if (pLevel == 0.0, {
+			// Replace mode
+			if (~dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).notNil {
+				~dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free
+			});
+
+			bufferEvent = ~dirt.soundLibrary.makeEventForBuffer(newBuffer);
+			~dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
+			~dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
+		}, {
+			// Overdub mode
+			if (~dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).duration == 0.0, {
+				~dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free;
+				// Sorry for duplicating code here #DRY :-P
+				// Maybe I will fix this later.
+				bufferEvent = ~dirt.soundLibrary.makeEventForBuffer(newBuffer);
+				~dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
+				~dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
+			});
+		});
+
 		cycseqOSC.sendMsg("/cycseq/message/looper", "loop" ++ ~lnr, true, ~linput);
-    });
+	});
+
+
+	q = Routine {
+		(~latency+latencyFineTuning).wait;
+		recSynth = Synth(\buffRecord,
+			[input: ~linput,pLevel: pLevel, buffer: ~dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
+			 ~dirt.server
+		);
+	}.play;
 
 	r = Routine {
-		(~delta.value + 0.04).wait;
-		synths[\addLoop].value;
+		(~delta.value + 0.1).wait;
+		synths[\sendLooperStatus].value;
 	}.play;
 };
 
-synths[\loopDebugger] = { |out, lrec = 0|
-	synths[\loopValues].value;
-	~lrec.postln;
-	~lpitch.postln;
-	~linput.postln;
-	~lname.postln;
-    ~lnr.postln;
-	"".postln;
+synths[\olooper] = {
+	pLevel = 1.0;
+	synths[\looper].value;
 };
 
-synths[\loopResetAll] = {
-    ~recBuffers.do(_.free);
-    ~recBuffers = recBuffers = { Buffer.alloc(~dirt.server, ~dirt.server.sampleRate * maxTime, 1) } ! numBuffers;
-	for(0,numBuffers-1, { |i|  ~dirt.soundLibrary.addBuffer("loop"++i, (recBuffers @ i), false )});
+synths[\rlooper] = {
+	pLevel = 0.0;
+	synths[\looper].value;
+};
 
-    recording = false;
+synths[\freeLoops] = {
+	synths[\loopValues].value;
+	~dirt.soundLibrary.freeSoundFiles(~lname.asSymbol);
+};
+
+synths[\persistLoops] = {
+	var abspath;
+
+	synths[\loopValues].value;
+
+	abspath = path.standardizePath ++ ~lname.asSymbol;
+
+	File.mkdir(abspath);
+
+	numBuffers.do({ |index|
+		~dirt.soundLibrary.buffers[~lname.asSymbol][index].write(
+			abspath ++ "/" + index ++ ".aiff"
+		)
+	})
 };
 
 synths.keysValuesDo{ |key, func|  ~dirt.soundLibrary.addSynth( key, (play: func)) };
 
 )
-

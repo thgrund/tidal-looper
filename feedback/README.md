@@ -1,6 +1,6 @@
 # Looper with osc feedback messages
 
-To display the recording status, osc messages are sent via SuperCollider. This folder contains an example for Hydra and an example for CycSeq.
+To display the recording status, osc messages are sent via SuperCollider. This folder contains an example for Hydra, OBS and an example for CycSeq.
 
 You may want to add the line ``s.options.protocol_(\tcp);`` to your ``startup.scd`` file in SuperCollider inside  ``s.reboot`` to make sure that the OSC feedback messages arrive in the correct order.
 
@@ -10,7 +10,7 @@ The usage of the looper can be found on the landing page of this project under [
 
 Hydra is a set of tools for livecoding networked visuals. There are plugins for Atom and VSCode. But you can also run it locally on your browser.
 
-In the file ``hydra-example-looper.scd`` two types of messages are sent  to different adresses: 
+In the file ``hydra-looper.scd`` two types of messages are sent  to different adresses: 
 
 - ``"/hydra/color"`` : Sends and array with three floats (as rgb) values
 - ``"/hydra/brightness"``: Sends and float value
@@ -28,6 +28,20 @@ The result of all this looks like this:
 - Hydra project page: https://github.com/ojack/hydra
 - Atom-Plugin: https://github.com/ojack/atom-hydra
 - VSCode Plugin: https://github.com/Jarvl/vscode-hydra
+
+## OBS Example
+
+OBS studio is a free and open source software for video recording and live streaming.
+
+In the file `obs-looper.scd` on message with the address `/scene/LiveCoding` is sent for changing the obs scene after a recording is finished. The value `LiveCoding` is just the name of an obs scene. 
+
+![obs-example](obs-example.gif)
+
+**Reference**
+
+- OBS: https://obsproject.com
+- Original ObSC github repo (control OBS with OSC): https://github.com/CarloCattano/ObSC
+- Custom change ObSC repo (extended functionality): https://github.com/thgrund/ObSC
 
 ## CycSeq Example
 
