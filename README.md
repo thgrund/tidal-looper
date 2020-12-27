@@ -22,7 +22,6 @@ The simplest form for recording is
 once $ s "looper" -- writes one cycle to the loop buffer and uses the input port 0 and the sample number 0
 ```
 
-In this case you should use `once`, because you would override the buffer with each cycle and therefore you never here a result.
 After recording you can listen back to the result with
 
 ```haskell
@@ -91,6 +90,8 @@ d1 $ qtrigger 1 $ stack [
     s "808 cp!3"
 ]
 ```
+
+If you record a loop of cycle length 1 and play it back at the same time, you will never hear a result, because the buffer is immediately rewritten at each cycle.
 
 **Note:** You can change the default looper mode by changing the variable `pLevel` in the `Looper.scd`.
 
