@@ -1,7 +1,20 @@
-# tidal-looper
-Looper for SuperDirt to provide live sampling in [TidalCycles](https://github.com/tidalcycles/Tidal).
+# TidalLooper
+Looper for [SuperDirt](https://github.com/musikinformatik/SuperDirt) to provide live sampling in [TidalCycles](https://github.com/tidalcycles/Tidal).
 
-## Pre-Requirement
+## SuperCollider Quark
+
+The TidalCycles looper can now be installed as SuperCollider Quark. 
+Currently this has to be done manually by downloading this repository and then adding the folder in SuperCollider under `Language -> Quarks -> Install a folder`. 
+
+This procedure has the following reasons:
+
+- Easier to extend and customize. 
+- There is a documentation in SuperCollider. 
+- The looper can be loaded in the startup script when starting the server.
+- Different releases can be issued in the future (but this is not done yet).
+
+## TidalCycles
+### Pre-Requirement
 
 First you should execute the following tidal code:
 
@@ -12,7 +25,7 @@ lname = pS "lname"
 
 Now you can use `linput` and `lname` as parameter.
 
-## How to use it
+### How to use it
 
 This basic operations which are explained below is shared by all looper modes. By default 8 buffers are created, and accessible under the name 'loop' (s) and a number from 0 .. 7 (n).
 
@@ -77,7 +90,7 @@ Maybe you want to use the looper with seqP, seqPLoop or wait.
 
 **Note 2:** If you want to use more samples under one name, than adjust the `numBuffers` in the `Looper.scd`.
 
-## Replace mode
+### Replace mode
 
 In replace mode, each time the recording pattern is called, the specified buffer is recreated and any existing buffer is cleared. The basic looper `s $ "looper"` is actually the `"rlooper"` (for replace looper) and just a synonym. 
 
@@ -95,7 +108,7 @@ If you record a loop of cycle length 1 and play it back at the same time, you wi
 
 **Note:** You can change the default looper mode by changing the variable `pLevel` in the `Looper.scd`.
 
-## Overdub mode
+### Overdub mode
 
 Loop overdub - A  mode found in many looping devices where new material can be added on top of — overdubbed on — existing loop material. This allows you to layer additional parts into a loop to create a fuller sound or a more “layered” effect. (See https://www.sweetwater.com/insync/loop-overdub/)
 
