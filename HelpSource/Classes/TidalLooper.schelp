@@ -1,0 +1,105 @@
+TITLE:: TidalLooper
+summary:: Looper for SuperDirt to provide live sampling in TidalCycles.
+categories:: Live Coding
+related:: SuperDirt
+
+DESCRIPTION::
+This is a looper implemented in the sound engine strong::SuperDirt:: link::https://github.com/musikinformatik/SuperDirt:: for the strong::Tidal:: link::http://tidalcycles.org/:: programming language by Alex McLean.
+Most parameters can be changed in SuperCollider as well as in TidalCycles at runtime. You can change the input ports, buffer name, recording levels or the synth defs for recording.
+
+note::
+This is experimental.
+
+It cannot be excluded that some interfaces will still change or will not be allowed later on.
+This looper only works together with SuperDirt and uses environment variables, so they must be allowed.
+::
+
+
+code::
+
+(
+	s.waitForBoot {
+		~dirt = SuperDirt(2, s);
+	    // More SuperDirt ...
+
+	    // Initialize the TidalLooper
+	    ~looper = TidalLooper(~dirt);
+
+	    // You can adjust these parameter even in runtime
+	    ~looper.rLevel = 1.5;
+	    ~looper.pLevel = 1.2;
+	    ~looper.linput = 15; // Set this to your main input port.
+	    ~looper.lname = "mybuffer";
+    }
+)
+::
+
+CLASSMETHODS::
+
+METHOD:: new
+Return a new instance and immediately starts the looper.
+
+ARGUMENT:: dirt
+The current dirt instance to be used. Usually this is ~dirt.
+
+INSTANCEMETHODS::
+
+METHOD:: linput
+Specifies the default input port which will be taken when you don't specify it in TidalCycles.
+
+METHOD:: lname
+Specifies the default buffer nae which will be taken when you don't specify it in TidalCycles.
+
+METHOD:: rLevel
+Value to multiply by input before mixing with existing data.
+
+METHOD:: pLevel
+Value to multiply to existing data in buffer before mixing with input. In replace mode this is always 0.0
+
+METHOD:: numBuffers
+Number of buffers that can be written per sample bank.
+
+METHOD:: looperSynth
+Name of the synthdef with which a buffer is recorded. Such a synthdef needs the parameters input, pLevel, rLevel and buffer.
+Examples can be taken from the synth folder.
+
+METHOD:: persistPath
+Recorded samples can be stored in this path. The persistLoops function is used for persisting.
+
+METHOD:: latencyFineTuning
+This value can be adjusted when the input and output is out of sync.
+
+METHOD:: loadSynthDefs
+Loads all synthdefs in the folder synths which are located in the files *.scd
+
+METHOD:: freeLoops
+Clears all buffers in the specified sample bank
+
+METHOD:: persistLoops
+Saves all samples in the specified sample bank in the folder specified in persistPath.
+
+EXAMPLES::
+
+code::
+(
+// Simple recording synthdef with no envelope or xfade
+SynthDef(\buffRecord, {|input = 0, pLevel = 0.0, rLevel = 1.0, buffer|
+	var in = SoundIn.ar(input);
+	RecordBuf.ar(in, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
+}).add;
+)
+
+(
+// Recording synthdef with envelope
+SynthDef(\buffRecordEnv, {|input = 0, pLevel = 0.0, rLevel = 1.0, buffer|
+    var in = SoundIn.ar(input);
+	var env = EnvGen.ar(Env.asr(0.01, 1, 1, 1), 1, doneAction:2);
+
+    RecordBuf.ar(in * env, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
+}).add;
+
+~looper.looperSynth = "buffRecordEnv";
+
+)
+
+::
