@@ -1,0 +1,7 @@
+(
+	\name: 			"TidalLooper",
+	\summary:		"Looper for SuperDirt to provide live sampling in TidalCycles.",
+	\author: 		"Thomas Grund",
+	\since: 		"2020",
+	\dependencies:  ["SuperDirt"]
+)
