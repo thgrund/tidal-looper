@@ -13,6 +13,41 @@ This procedure has the following reasons:
 - The looper can be loaded in the startup script when starting the server.
 - Different releases can be issued in the future (but this is not done yet).
 
+### How to use it
+
+To start the TidalLooper you first have to create a SuperDirt instance and then initialize the TidalLooper.
+
+```
+~dirt = SuperDirt(2, s);
+~looper = TidalLooper(~dirt);
+```
+
+You can adjust various parameters:
+```
+~looper.pLevel = 0.8;
+```
+
+In SuperCollider you can also add the TidalLooper under `File -> Open startup script` 
+and have it available after every server start.
+
+```
+(
+    s.waitForBoot {
+        ~dirt = SuperDirt(2, s);
+        // More SuperDirt ...
+
+        // Initialize the TidalLooper
+        ~looper = TidalLooper(~dirt);
+
+        // You can adjust these parameter even in runtime
+        ~looper.rLevel = 1.5;
+        ~looper.pLevel = 0.8;
+        ~looper.linput = 15; // Set this to your main input port.
+        ~looper.lname = "mybuffer";
+    }
+)
+```
+
 ## TidalCycles
 ### Pre-Requirement
 
