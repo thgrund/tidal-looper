@@ -8,6 +8,10 @@ TidalLooper {
 	var <>looperSynth = 'buffRecord';
 	var <>persistPath = "~/Music/Loops/";
 	var <>latencyFineTuning = 0.04;
+	var currentCycleValues, currentRecordSynth, currentInput;
+	var <>oscAddr = "127.0.0.1", <>oscPort = 57121;
+	var oscNetAddr;
+	var loopCalls = 0;
 
 	classvar internalPLevel = 0.0;
 
@@ -28,6 +32,26 @@ TidalLooper {
 				("function " ++ key ++ " was successfully loaded.").postln;
 				dirt.soundLibrary.addSynth( key, (play: func));
 			};
+
+			currentCycleValues = [];
+
+			oscNetAddr = NetAddr(oscAddr, oscPort);
+
+			dirt.receiveAction = { |e|
+				if ((e[\s] == \looper) || (e[\s] == \olooper) || (e[\s] == \rlooper), {
+						if (e[\linput].isNil, {
+							currentInput = linput;
+						}, {
+							currentInput = e[\linput];
+						})
+					});
+			};
+		});
+   }
+
+   sendLooperStatus {
+		if (loopCalls == ~loopCalls, {
+			oscNetAddr.sendMsg("/looper/message/", ~lname, ~linput, ~n, false);
 		});
 	}
 
@@ -46,6 +70,7 @@ TidalLooper {
 		if (~linput.isNil) {~linput = linput};
 		if (~lname.isNil) {~lname = lname};
 		if (~n == \none, {~n = 0.0});
+		if (~loopCalls.isNil) {~loopCalls = loopCalls};
 	}
 
 	createLooperFunctions {
@@ -55,7 +80,9 @@ TidalLooper {
 			var newBuffer;
 			var modN;
 			var bufferEvent;
-			var recSynth;
+			var currentValueDict = Dictionary.newFrom(currentCycleValues);
+
+			loopCalls = loopCalls + 1;
 
 			this.mapTidalParameter;
 
@@ -84,6 +111,7 @@ TidalLooper {
 					});
 
 					bufferEvent = dirt.soundLibrary.makeEventForBuffer(newBuffer);
+					bufferEvent[\notYetRead] = false;
 					dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
 					dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
 				}, {
@@ -93,19 +121,27 @@ TidalLooper {
 						// Sorry for duplicating code here #DRY :-P
 						// Maybe I will fix this later.
 						bufferEvent = dirt.soundLibrary.makeEventForBuffer(newBuffer);
+						bufferEvent[\notYetRead] = false;
 						dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
 						dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
 					});
 				});
 
+				oscNetAddr.sendMsg("/looper/message/", ~lname, ~linput, ~n, true);
+
 			});
 
 			Routine {
 				(~latency+latencyFineTuning).wait;
-				recSynth = Synth(looperSynth.asSymbol,
-					[input: ~linput,pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
+				Synth(looperSynth.asSymbol,
+					[input: currentInput,pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
 					dirt.server
 				);
+			}.play;
+
+			Routine {
+			    (~delta.value + 0.1).wait;
+			    this.sendLooperStatus;
 			}.play;
 		};
 
@@ -149,3 +185,4 @@ TidalLooper {
 	}
 
 }
+
