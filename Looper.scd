@@ -3,7 +3,7 @@ var synths = ();
 var recSynth;
 var numBuffers = 8;
 var recBufs;
-var linput = 16;
+var linput = 0;
 var lname = "loop";
 var path = "~/Music/Loops/";
 // Set the default looper mode.

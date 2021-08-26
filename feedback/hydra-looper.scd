@@ -3,7 +3,7 @@ var synths = ();
 var recSynth;
 var numBuffers = 8;
 var recBufs;
-var linput = 14;
+var linput = 0;
 var lname = "loop";
 var path = "~/Music/Loops/";
 var loopCalls = 0;
