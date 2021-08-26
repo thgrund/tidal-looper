@@ -8,26 +8,17 @@ var lname = "loop";
 var path = "~/Music/Loops/";
 var loopCalls = 0;
 var hydraOSC = NetAddr("127.0.0.1", 3336);
+var obsOSC = NetAddr("127.0.0.1", 5005);
 var latencyFineTuning = 0.04;
 
 // Set the default looper mode.
 // 0.0 = replace mode
 // 1.0 = overdub mode
 var pLevel = 0.0;
-var hydraColors = List[
-	[1, 0.3, 0.2],
-	[1, 0.1, 0.3],
-	[1, 0.5, 0.3],
-	[1, 0.6, 0.2],
-	[1, 0.6, 0.6],
-	[1, 0, 0.6],
-	[1, 0.7, 0],
-	[0.9, 0.8, 0.8]
-];
 
 SynthDef(\buffRecord, {|input = 0, pLevel = 0.0, buffer|
 	var in = SoundIn.ar(input);
-	RecordBuf.ar(in, buffer, recLevel: 0.85, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
+	RecordBuf.ar(in, buffer, recLevel: 2, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
 }).add;
 
 synths[\loopValues] = {
@@ -39,7 +30,9 @@ synths[\loopValues] = {
 
 synths[\sendLooperStatus] = {|bufn = "loop"|
 	if (loopCalls == ~loopCalls, {
-		hydraOSC.sendMsg("/hydra/color", 0.2, 0.5, 0.6);
+		hydraOSC.sendMsg("/hydra/invert", 0);
+		(0.5).wait;
+	    obsOSC.sendMsg("/scene/LiveCodingVisuals");
 	});
 };
 
@@ -91,8 +84,7 @@ synths[\looper] = {
 		});
 
 
-		hydraOSC.sendMsg("/hydra/color", *hydraColors[modN]);
-		hydraOSC.sendMsg("/hydra/size", 0.5);
+		hydraOSC.sendMsg("/hydra/invert", 1);
 
 	});
 
