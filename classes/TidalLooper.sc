@@ -9,8 +9,6 @@ TidalLooper {
 	var <>persistPath = "~/Music/Loops/";
 	var <>latencyFineTuning = 0.04;
 	var currentCycleValues, currentRecordSynth, currentInput;
-	var <>oscAddr = "127.0.0.1", <>oscPort = 57121;
-	var oscNetAddr;
 	var loopCalls = 0;
 
 	classvar internalPLevel = 0.0;
@@ -34,26 +32,8 @@ TidalLooper {
 			};
 
 			currentCycleValues = [];
-
-			oscNetAddr = NetAddr(oscAddr, oscPort);
-
-			dirt.receiveAction = { |e|
-				if ((e[\s] == \looper) || (e[\s] == \olooper) || (e[\s] == \rlooper), {
-						if (e[\linput].isNil, {
-							currentInput = linput;
-						}, {
-							currentInput = e[\linput];
-						})
-					});
-			};
 		});
    }
-
-   sendLooperStatus {
-		if (loopCalls == ~loopCalls, {
-			oscNetAddr.sendMsg("/looper/message/", ~lname, ~linput, ~n, false);
-		});
-	}
 
 	loadSynthDefs { |path|
 		var filePaths;
@@ -81,6 +61,12 @@ TidalLooper {
 			var modN;
 			var bufferEvent;
 			var currentValueDict = Dictionary.newFrom(currentCycleValues);
+
+			if (~linput.isNil, {
+				currentInput = linput;
+			}, {
+				currentInput = ~linput;
+			});
 
 			loopCalls = loopCalls + 1;
 
@@ -126,9 +112,6 @@ TidalLooper {
 						dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
 					});
 				});
-
-				oscNetAddr.sendMsg("/looper/message/", ~lname, ~linput, ~n, true);
-
 			});
 
 			Routine {
@@ -141,7 +124,6 @@ TidalLooper {
 
 			Routine {
 			    (~delta.value + 0.1).wait;
-			    this.sendLooperStatus;
 			}.play;
 		};
 
