@@ -3,12 +3,13 @@ TidalLooper {
 	var dirt;
 
 	var <>lname = "loop", <>linput = 0;
+	var <>channels = 1;
 	var <>pLevel = 1.0, <>rLevel = 1.0; //replace behaviour
 	var <>numBuffers = 8;
 	var <>looperSynth = 'buffRecord';
 	var <>persistPath = "~/Music/Loops/";
 	var <>latencyFineTuning = 0.04;
-	var currentCycleValues, currentRecordSynth, currentInput;
+	var currentCycleValues, currentRecordSynth, currentInput, currentChannels;
 	var loopCalls = 0;
 
 	classvar internalPLevel = 0.0;
@@ -61,6 +62,7 @@ TidalLooper {
 			var modN;
 			var bufferEvent;
 			var currentValueDict = Dictionary.newFrom(currentCycleValues);
+			var inputChannels;
 
 			if (~linput.isNil, {
 				currentInput = linput;
@@ -68,20 +70,28 @@ TidalLooper {
 				currentInput = ~linput;
 			});
 
+			if (~channels.isNil, {
+				currentChannels = channels;
+			}, {
+				currentChannels = ~channels;
+			});
+
+			inputChannels = Array.series(currentChannels,currentInput,1);
+
 			loopCalls = loopCalls + 1;
 
 			this.mapTidalParameter;
 
 			modN = ~n % numBuffers;
 
-			newBuffer = Buffer.alloc(dirt.server, dirt.server.sampleRate * (~delta.value),1);
+			newBuffer = Buffer.alloc(dirt.server, dirt.server.sampleRate * (~delta.value),currentChannels);
 
 			if (dirt.soundLibrary.buffers[~lname.asSymbol].size != numBuffers, {
 				numBuffers.do({
 					// Add empty buffer to access the list element later
 					dirt.soundLibrary.addBuffer(
 						~lname.asSymbol,
-						Buffer.alloc(dirt.server, 0, 1),
+						Buffer.alloc(dirt.server, 0, currentChannels),
 						true
 					);
 				});
@@ -116,8 +126,8 @@ TidalLooper {
 
 			Routine {
 				(~latency+latencyFineTuning).wait;
-				Synth(looperSynth.asSymbol,
-					[input: currentInput,pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
+				Synth((looperSynth ++ currentChannels).asSymbol,
+					[input: inputChannels, pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
 					dirt.server
 				);
 			}.play;
