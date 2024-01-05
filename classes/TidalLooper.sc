@@ -76,7 +76,9 @@ TidalLooper {
 				currentChannels = ~channels;
 			});
 
+
 			inputChannels = Array.series(currentChannels,currentInput,1);
+
 
 			loopCalls = loopCalls + 1;
 
