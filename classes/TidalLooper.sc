@@ -9,6 +9,8 @@ TidalLooper {
 	var <>looperSynth = 'buffRecord';
 	var <>persistPath = "~/Music/Loops/";
 	var <>latencyFineTuning = 0.04;
+	var <>looperStartEvent, <>looperEndEvent;
+
 	var currentCycleValues, currentRecordSynth, currentInput, currentChannels;
 	var loopCalls = 0;
 
@@ -63,6 +65,7 @@ TidalLooper {
 			var bufferEvent;
 			var currentValueDict = Dictionary.newFrom(currentCycleValues);
 			var inputChannels;
+			var env = currentEnvironment;
 
 			if (~linput.isNil, {
 				currentInput = linput;
@@ -78,7 +81,6 @@ TidalLooper {
 
 
 			inputChannels = Array.series(currentChannels,currentInput,1);
-
 
 			loopCalls = loopCalls + 1;
 
@@ -127,6 +129,7 @@ TidalLooper {
 			});
 
 			Routine {
+				looperStartEvent.value(env);
 				(~latency+latencyFineTuning).wait;
 				Synth((looperSynth ++ currentChannels).asSymbol,
 					[input: inputChannels, pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
@@ -136,6 +139,7 @@ TidalLooper {
 
 			Routine {
 			    (~delta.value + 0.1).wait;
+				looperEndEvent.value();
 			}.play;
 		};
 
