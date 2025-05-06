@@ -6,10 +6,11 @@ TidalLooper {
 	var <>channels = 1;
 	var <>pLevel = 1.0, <>rLevel = 1.0; //replace behaviour
 	var <>numBuffers = 8;
-	var <>looperSynth = 'buffRecord';
+	var <>looperSynth;
 	var <>persistPath = "~/Music/Loops/";
 	var <>latencyFineTuning = 0.04;
-	var <>looperStartEvent, <>looperEndEvent;
+	var >looperStartEvent, >looperEndEvent;
+	var >recordSource = "in";
 
 	var currentCycleValues, currentRecordSynth, currentInput, currentChannels;
 	var loopCalls = 0;
@@ -67,6 +68,14 @@ TidalLooper {
 			var inputChannels;
 			var env = currentEnvironment;
 
+			var localRecordSource;
+
+			if (env.at(\recordSource).notNil, {
+				localRecordSource = env.at(\recordSource);
+			}, {
+				localRecordSource = recordSource;
+			});
+
 			if (~linput.isNil, {
 				currentInput = linput;
 			}, {
@@ -78,7 +87,6 @@ TidalLooper {
 			}, {
 				currentChannels = ~channels;
 			});
-
 
 			inputChannels = Array.series(currentChannels,currentInput,1);
 
@@ -129,9 +137,23 @@ TidalLooper {
 			});
 
 			Routine {
+				var synthName;
+
+				if (looperSynth.isNil, {
+					if (localRecordSource.asSymbol == \out, {
+						synthName = "buffRecordOut" ++ currentChannels;
+						inputChannels = dirt.orbits[currentInput].dryBus.index;
+
+					}, {
+						synthName = "buffRecord" ++ currentChannels;
+					});
+				}, synthName = looperSynth);
+
 				looperStartEvent.value(env);
+
 				(~latency+latencyFineTuning).wait;
-				Synth((looperSynth ++ currentChannels).asSymbol,
+
+				Synth((synthName).asSymbol,
 					[input: inputChannels, pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
 					dirt.server
 				);
@@ -182,5 +204,11 @@ TidalLooper {
 		})
 	}
 
-}
+	gui {
 
+		var pianoKeyboadView = PianoKeyboard.new;
+
+		pianoKeyboadView.createUI(dirt, this);
+	}
+
+}
