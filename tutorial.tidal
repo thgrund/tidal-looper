@@ -1,0 +1,100 @@
+
+-- Record and replace output
+do
+d1 $ sound "<[bd*2, hh*4, cr, ~ sn] ~>"
+d2 $ s "< looper ~ >" # recordSource "out"
+d3 $ s "< ~ loop>"
+
+-- Record and overdub output
+do
+d1 $ qt $ sound "superpiano" <| note "< c e g b ~!4 >"
+d2 $ qt $ s "olooper" # lname "oloop"
+d3 $ qt $ s "oloop"
+once $ s "freeLoops" # lname "oloop" # orbit 0
+
+-- External looper control
+do
+d1 $ qt $ sound "superpiano" <| note "< [c'maj7'4 g4'maj'4] ~ >"
+-- s "< rlooper ~ >"
+d2 $ qt $ s (cP "loopPt")
+d3 $ qt $ s "< ~ loop >" # lpf 1400
+d4 $ s "cr hh!3"
+once $ s "freeLoops" # lname "loop" # orbit 0
+
+-- Replace canon
+
+do
+d1 $ qt $ seqP [
+   (0, 2, note "[c d e c]")
+   , (2, 4, note "[e f g@2]")
+   , (4,6, note "[g a g f e@2 c@2]")
+   , (6,8, note "[c g4 c@2]")
+   ] # s "superpiano" # legato 1 # speed 0.5
+
+d2 $ qt $ s "rlooper/8" # linput 0
+d3 $ qt $ s "loop/2" # pan rand
+once $ s "freeLoops" # lname "loop" # orbit 0
+
+-- Different loop same pattern
+do
+d1 $ qt $ arp "< up updown thumbup down ~!4 >"
+   $ sound "superpiano"
+   <| note "< < c g >'maj7'8 < a e >'min7'8 >"
+d2 $ qt $ s "< rlooper!4 ~!4 >" # n "< 0 1 2 3 >"
+d3 $ qt $ jux (rev)
+   $ slice 8 "3*4 2 8 6 4 2 1 7"
+   $ s "<~!4 loop!4>"
+   # n "< 0 1 2 3 >" # legato 0.5
+once $ s "freeLoops" # lname "loop" # orbit 0
+
+-- Different pattern same loop
+do
+d1 $ qt $ arp "updown"
+   $ sound "< superpiano ~!4 >"
+   <| note "c'maj7'4"
+-- $ sound "< sally ~!4 >" <| note "f5'maj'8" # legato 1
+d2 $ qt $ s "< rlooper ~!4 >"
+d3 $ qt $ while "< t f!4 >" (#silence)
+   $ jux rev
+   $ slice 8 "< [6 3*4 7 2 5*2 8 1 4] [8*4 1*4]>"
+   $ s " loop" # legato 1 # speed "< ~ 1 1 2 2>"
+   # coarse "<~ 4 8 2 1>"
+d4 $ qt $ while "< t f!4 >" (#silence)
+   $ slice 8 "1(5,8,<2 4>)"
+   $ s "loop" # speed 0.25
+   # legato "< ~ 1! 0.5! >" # lpf 1000
+once $ s "freeLoops" # lname "loop" # orbit 0
+
+-- Sample the output
+do
+d1 $ qt $ sound "< bd hh sn cr [tom:0 tom:1 tom:2 tom:3 sn!4]*2 >" # drumBank 2
+d2 $ qt $ s "< rlooper!5 ~!4 >" # n "< 0 1 2 3 4 >"
+once $ s "freeLoops" # lname "loop" # orbit 0
+
+-- Feedback loop
+do
+d1 $ qt $ arp "updown"
+   $ sound "superpiano"
+   <| note "c'maj7'4"
+d2 $ qt $ s "rlooper" # n "< 0 1 >" # linput "< 0 2!3 >"
+d3 $ qt $ slice 8 "2 3 4 5 6 7 8 1"
+   $ s "loop"
+   # n "< 1 0 >"
+once $ s "freeLoops" # lname "loop" # orbit 0
+
+-- Feedback loop (end condition)
+do
+-- Starting point
+d1 $ qt $ arp "updown"
+   $ sound "< superpiano ~!15 >"
+   <| note "c'maj7'8"
+-- linput defines the end codition (jump back to 0)
+d2 $ qt $ s "rlooper" # n "< 0 1 >" # linput "< 0 2!15 >"
+-- This would slowing down "forever"
+d3 $ qt
+   $ s "< ~ loop!15 >"
+   # n "< 1 0 >"
+   -- "# speed "-1" will flip the speed every round
+   # speed (15/16)
+   # legato 1
+once $ s "freeLoops" # lname "loop" # orbit 0

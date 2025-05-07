@@ -3,13 +3,13 @@ Looper for [SuperDirt](https://github.com/musikinformatik/SuperDirt) to provide 
 
 ## SuperCollider Quark
 
-The TidalCycles looper can now be installed as SuperCollider Quark. 
-Currently this has to be done manually by downloading this repository and then adding the folder in SuperCollider under `Language -> Quarks -> Install a folder`. 
+The TidalCycles looper can now be installed as SuperCollider Quark.
+Currently this has to be done manually by downloading this repository and then adding the folder in SuperCollider under `Language -> Quarks -> Install a folder`.
 
 This procedure has the following reasons:
 
-- Easier to extend and customize. 
-- There is a documentation in SuperCollider. 
+- Easier to extend and customize.
+- There is a documentation in SuperCollider.
 - The looper can be loaded in the startup script when starting the server.
 - Different releases can be issued in the future (but this is not done yet).
 
@@ -27,7 +27,7 @@ You can adjust various parameters:
 ~looper.pLevel = 0.8;
 ```
 
-In SuperCollider you can also add the TidalLooper under `File -> Open startup script` 
+In SuperCollider you can also add the TidalLooper under `File -> Open startup script`
 and have it available after every server start.
 
 ```
@@ -40,7 +40,7 @@ and have it available after every server start.
         ~looper = TidalLooper(~dirt);
 
         // You can adjust these parameter even in runtime
-        ~looper.rLevel = 1.5;
+        ~looper.rLevel = 2.5;
         ~looper.pLevel = 0.8;
         ~looper.linput = 15; // Set this to your main input port.
         ~looper.lname = "mybuffer";
@@ -56,9 +56,10 @@ First you should execute the following tidal code:
 ```haskell
 linput = pI "linput"
 lname = pS "lname"
+recordSource = pS "recordSource"
 ```
 
-Now you can use `linput` and `lname` as parameter.
+Now you can use `linput`, `lname` and `recordSource` as parameter.
 
 ### How to use it
 
@@ -127,7 +128,7 @@ Maybe you want to use the looper with seqP, seqPLoop or wait.
 
 ### Replace mode
 
-In replace mode, each time the recording pattern is called, the specified buffer is recreated and any existing buffer is cleared. The basic looper `s $ "looper"` is actually the `"rlooper"` (for replace looper) and just a synonym. 
+In replace mode, each time the recording pattern is called, the specified buffer is recreated and any existing buffer is cleared. The basic looper `s $ "looper"` is actually the `"rlooper"` (for replace looper) and just a synonym.
 
 To continuously play back and record a loop, the code could looks like this
 
@@ -152,12 +153,9 @@ In overdub mode, each time the recording pattern is called, the specified buffer
 To continuously play back and record a loop, the code could looks like this
 
 ```haskell
-d1 $ qtrigger 1 $ stack [s "olooper",s "loop",s "808 cp!3"] 
+d1 $ qtrigger 1 $ stack [s "olooper",s "loop",s "808 cp!3"]
 ```
 
 **Note 1:** The buffer length of a buffer is set when recording for the first time and cannot be changed afterwards (unless you clear the buffer with `s "freeLoops"`) .
 
 **Note 2:** In an older version the additional function `playAll` was needed to simulate an overdub mode. This is no longer necessary because a "real" overdub mode was implemented.
-
-
-

@@ -7,6 +7,9 @@ DESCRIPTION::
 This is a looper implemented in the sound engine strong::SuperDirt:: link::https://github.com/musikinformatik/SuperDirt:: for the strong::Tidal:: link::http://tidalcycles.org/:: programming language by Alex McLean.
 Most parameters can be changed in SuperCollider as well as in TidalCycles at runtime. You can change the input ports, buffer name, recording levels or the synth defs for recording.
 
+See the Tutorials section for how to control with external tools:
+- link::Tutorials/TidalCycles::.
+
 note::
 This is experimental.
 
