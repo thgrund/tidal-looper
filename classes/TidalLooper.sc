@@ -11,6 +11,7 @@ TidalLooper {
 	var <>latencyFineTuning = 0.04;
 	var >looperStartEvent, >looperEndEvent;
 	var >recordSource = "in";
+	var >debugMode = false;
 
 	var currentCycleValues, currentRecordSynth, currentInput, currentChannels;
 	var loopCalls = 0;
@@ -112,7 +113,7 @@ TidalLooper {
 
 			if (((~s == \rlooper) || (~s == \looper)) ||
 				(~s == \olooper) ||
-				((~s == \slooper) && (~dirt.soundLibrary.buffers[~lname.asSymbol][modN].numFrames == 0 || ~dirt.soundLibrary.buffers[~lname.asSymbol][modN].numFrames.isNil)), {
+				((~s == \slooper) && (~dirt.soundLibrary.buffers[~lname.asSymbol][modN].numFrames == 0)), {
 
 					// Allocate new buffer with a size based on the delta value
 					dirt.server.makeBundle(~latency + 0.01, {
@@ -162,6 +163,10 @@ TidalLooper {
 
 						(~latency+latencyFineTuning).wait;
 
+						if (debugMode, {
+							format("Recording Started. [Looper type: % , buffer name: %,  position: %]\n", ~s, ~lname, ~n).post;
+						});
+
 						Synth((synthName).asSymbol,
 							[input: inputChannels, pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
 							dirt.server
@@ -170,9 +175,17 @@ TidalLooper {
 					Routine {
 						(~delta.value + 0.1).wait;
 						looperEndEvent.value();
+
+						if (debugMode, {
+							format("Recording Stopped. [Looper type: % , buffer name: %,  position: %]\n", ~s, ~lname, ~n).post;
+						});
+
 					}.play;
 				}, {
-					"".post;
+					if (debugMode, {
+						format("Looper % was executed but nothing was recorded. [buffer: name %,  position: %]\n", ~s, ~lname, ~n).post;
+					}, {"".post;});
+
 			});
 		};
 
@@ -193,14 +206,18 @@ TidalLooper {
 		};
 
 		synths[\freeLoops] = {
+
 			this.mapTidalParameter;
 
 			if (~n.isNil, {
 				dirt.soundLibrary.freeSoundFiles(~lname.asSymbol);
 			});
 
-			if (dirt.soundLibrary.buffers[~lname.asSymbol].notNil, {
-				dirt.soundLibrary.buffers[~lname.asSymbol].at(~n).free;
+			if (dirt.soundLibrary.buffers[~lname.asSymbol].notNil && ~n.notNil, {
+				var	modN = ~n % numBuffers;
+
+				dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free;
+				dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, Buffer.alloc(dirt.server, 0, currentChannels));
 			});
 
 		};
