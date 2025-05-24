@@ -61,9 +61,10 @@ TidalLooper {
 		var synths = ();
 
 		synths[\looper] = {
+			arg event;
+
 			var newBuffer;
 			var modN;
-			var bufferEvent;
 			var currentValueDict = Dictionary.newFrom(currentCycleValues);
 			var inputChannels;
 			var env = currentEnvironment;
@@ -109,75 +110,99 @@ TidalLooper {
 				});
 			});
 
-			// Allocate new buffer with a size based on the delta value
-			dirt.server.makeBundle(~latency + 0.01, {
+			if (((~s == \rlooper) || (~s == \looper)) ||
+				(~s == \olooper) ||
+				((~s == \slooper) && (~dirt.soundLibrary.buffers[~lname.asSymbol][modN].numFrames == 0 || ~dirt.soundLibrary.buffers[~lname.asSymbol][modN].numFrames.isNil)), {
 
-				if (internalPLevel == 0.0, {
-					// Replace mode
-					if (dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).notNil {
-						dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free
+					// Allocate new buffer with a size based on the delta value
+					dirt.server.makeBundle(~latency + 0.01, {
+						var createBuffers = {
+							var bufferEvent;
+							bufferEvent = dirt.soundLibrary.makeEventForBuffer(newBuffer);
+							bufferEvent[\notYetRead] = false;
+							dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
+							dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
+						};
+
+						if ( ((~s == \rlooper) || (~s == \looper)), {
+							// Replace mode
+							if (dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).notNil {
+								dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free
+							});
+
+							createBuffers.value();
+						});
+
+						if (~s == \olooper ,{
+							// Overdub mode
+							if (dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).duration == 0.0, {
+								dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free;
+								createBuffers.value();
+							});
+						});
+
+						if (~s == \slooper, {
+							createBuffers.value();
+						});
 					});
 
-					bufferEvent = dirt.soundLibrary.makeEventForBuffer(newBuffer);
-					bufferEvent[\notYetRead] = false;
-					dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
-					dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
+					Routine {
+						var synthName;
+
+						if (looperSynth.isNil, {
+							if (localRecordSource.asSymbol == \out, {
+								synthName = "buffRecordOut" ++ currentChannels;
+								inputChannels = dirt.orbits[currentInput].dryBus.index;
+							}, {
+    						synthName = "buffRecord" ++ currentChannels;
+							});
+						}, synthName = looperSynth);
+
+						looperStartEvent.value(env);
+
+						(~latency+latencyFineTuning).wait;
+
+						Synth((synthName).asSymbol,
+							[input: inputChannels, pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
+							dirt.server
+						);
+    			}.play;
+					Routine {
+						(~delta.value + 0.1).wait;
+						looperEndEvent.value();
+					}.play;
 				}, {
-					// Overdub mode
-					if (dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).duration == 0.0, {
-						dirt.soundLibrary.buffers[~lname.asSymbol].at(modN).free;
-						// Sorry for duplicating code here #DRY :-P
-						// Maybe I will fix this later.
-						bufferEvent = dirt.soundLibrary.makeEventForBuffer(newBuffer);
-						bufferEvent[\notYetRead] = false;
-						dirt.soundLibrary.buffers[~lname.asSymbol].put(modN, newBuffer);
-						dirt.soundLibrary.bufferEvents[~lname.asSymbol].put(modN, bufferEvent);
-					});
-				});
+					"".post;
 			});
-
-			Routine {
-				var synthName;
-
-				if (looperSynth.isNil, {
-					if (localRecordSource.asSymbol == \out, {
-						synthName = "buffRecordOut" ++ currentChannels;
-						inputChannels = dirt.orbits[currentInput].dryBus.index;
-
-					}, {
-						synthName = "buffRecord" ++ currentChannels;
-					});
-				}, synthName = looperSynth);
-
-				looperStartEvent.value(env);
-
-				(~latency+latencyFineTuning).wait;
-
-				Synth((synthName).asSymbol,
-					[input: inputChannels, pLevel: internalPLevel, rLevel: this.rLevel, buffer: dirt.soundLibrary.buffers[~lname.asSymbol][modN]],
-					dirt.server
-				);
-			}.play;
-
-			Routine {
-			    (~delta.value + 0.1).wait;
-				looperEndEvent.value();
-			}.play;
 		};
+
 
 		synths[\olooper] = {
 			internalPLevel = pLevel;
-			synths[\looper].value;
+			synths[\looper].value();
 		};
 
 		synths[\rlooper] = {
 			internalPLevel = 0.0;
-			synths[\looper].value;
+			synths[\looper].value();
+		};
+
+		synths[\slooper] = {
+			internalPLevel = 0.0;
+			synths[\looper].value();
 		};
 
 		synths[\freeLoops] = {
 			this.mapTidalParameter;
-			dirt.soundLibrary.freeSoundFiles(~lname.asSymbol);
+
+			if (~n.isNil, {
+				dirt.soundLibrary.freeSoundFiles(~lname.asSymbol);
+			});
+
+			if (dirt.soundLibrary.buffers[~lname.asSymbol].notNil, {
+				dirt.soundLibrary.buffers[~lname.asSymbol].at(~n).free;
+			});
+
 		};
 
 		^synths;
