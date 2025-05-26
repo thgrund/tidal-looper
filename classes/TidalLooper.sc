@@ -31,7 +31,7 @@ TidalLooper {
 
 			this.loadSynthDefs;
 
-			this.createLooperFunctions.keysValuesDo{ |key, func|
+			this.prCreateLooperFunctions.keysValuesDo{ |key, func|
 				("function " ++ key ++ " was successfully loaded.").postln;
 				dirt.soundLibrary.addSynth( key, (play: func));
 			};
@@ -51,14 +51,14 @@ TidalLooper {
 		}
 	}
 
-	mapTidalParameter {
+	prMapTidalParameter {
 		if (~linput.isNil) {~linput = linput};
 		if (~lname.isNil) {~lname = lname};
 		if (~n == \none, {~n = 0.0});
 		if (~loopCalls.isNil) {~loopCalls = loopCalls};
 	}
 
-	createLooperFunctions {
+	prCreateLooperFunctions {
 		var synths = ();
 
 		synths[\looper] = {
@@ -94,7 +94,7 @@ TidalLooper {
 
 			loopCalls = loopCalls + 1;
 
-			this.mapTidalParameter;
+			this.prMapTidalParameter;
 
 			modN = ~n % numBuffers;
 
@@ -207,7 +207,7 @@ TidalLooper {
 
 		synths[\freeLoops] = {
 
-			this.mapTidalParameter;
+			this.prMapTidalParameter;
 
 			if (~n.isNil, {
 				dirt.soundLibrary.freeSoundFiles(~lname.asSymbol);
@@ -226,14 +226,14 @@ TidalLooper {
 	}
 
 	freeLoops { | lname = "loop" |
-		this.mapTidalParameter;
+		this.prMapTidalParameter;
 		dirt.soundLibrary.freeSoundFiles(lname.asSymbol);
 	}
 
 	persistLoops { | lname = "loop" |
 		var abspath;
 
-		this.mapTidalParameter;
+		this.prMapTidalParameter;
 
 		abspath = this.persistPath.standardizePath ++ lname.asSymbol;
 

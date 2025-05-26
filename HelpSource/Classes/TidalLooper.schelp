@@ -81,28 +81,100 @@ Clears all buffers in the specified sample bank
 METHOD:: persistLoops
 Saves all samples in the specified sample bank in the folder specified in persistPath.
 
-EXAMPLES::
+METHOD:: gui
+
+Simple user interface for simulating an external instrument. With this it is possible to trigger SuperDirt events with the keyboard or a mouse. When the window is in focus, it is possible to trigger the piano keys with keyboard strokes. The mapping of the keys can be seen here:
+
+IMAGE::LooperGUI.png::
+
+When the big button on the right with the text "Record" is active, then the pattern under "Looper Pattern" will be send as a control pattern with the name "loopPt". This can be then used in TidalCycles with i.e. 's (cP "loopPt")'. Is the button inactive, then the ui will always send a rest '~'.
+
+METHOD:: channels
+
+Possible values are 1 (mono) and 2 (stereo).
+
+This is the number of channels, that will be used for recording.
+
+METHOD:: debugMode
+Set this to true, for posting additional informations about recording status in the post window.
+
+METHOD:: looperStartEvent
+This callback function will be send, when a looper was started. You do have access to the event, that was triggered by the looper.
 
 code::
 (
-// Simple recording synthdef with no envelope or xfade
-SynthDef(\buffRecord, {|input = 0, pLevel = 0.0, rLevel = 1.0, buffer|
+~looper.looperStartEvent = {
+	arg event;
+	[event.at(\s), event.at(\lname), event.at(\linput)].postln;
+}
+)
+::
+
+METHOD:: looperEndEvent
+
+This callback function will be send, when a looper stopped a recording. You do have access to the event, that was triggered by the looper.
+
+code::
+(
+~looper.looperEndEvent = {
+	arg event;
+	[event.at(\s), event.at(\lname), event.at(\linput)].postln;
+}
+)
+
+::
+
+METHOD:: recordSource
+
+With this you define the default record source. The value "in" means, that an input bus will be used for recording. The "out" value means, that the synthbus of an orbit will be used for recording.
+
+ARGUMENT::source
+Possible values are "in" and "out".
+
+EXAMPLES::
+
+The looper has three different modes, that can be triggered with TidalCycles. You can test them with using them directly in SuperCollider. For testing them, it is recommended to set the debugMode of the looper to true.
+code::
+
+// Replace mode
+(type: \dirt, dirt: ~dirt, s: \rlooper, delta: 1, lname: "loop", linput: 0).play
+
+// Single shot mode
+(type: \dirt, dirt: ~dirt, s: \slooper, delta: 1, lname: "loop", linput: 0).play
+
+// Overdub mode
+(type: \dirt, dirt: ~dirt, s: \olooper, delta: 1, lname: "loop", linput: 0).play
+
+::
+
+You can overwrite the SynthDefs used by the looper with your own custom SynthDef and make it accessible like this:
+
+code::
+
+(
+SynthDef(\buffRecord1, {|input = 0, pLevel = 0.0, rLevel = 1.0, buffer|
 	var in = SoundIn.ar(input);
+	RecordBuf.ar(in, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
+}).add;
+
+SynthDef(\buffRecord2, {|input, pLevel = 0.0, rLevel = 1.0, buffer|
+	var in = SoundIn.ar(input);
+
+	RecordBuf.ar([in, in]*env, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
+}).add;
+)
+
+(
+SynthDef(\buffRecordOut1, {|input = 0, pLevel = 0.0, rLevel = 1.0, buffer|
+	var in = InFeedback.ar(input);
+	RecordBuf.ar(in, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
+}).add;
+
+SynthDef(\buffRecordOut2, {|input, pLevel = 0.0, rLevel = 1.0, buffer|
+	var in = InFeedback.ar(input, 2);
 	RecordBuf.ar(in, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
 }).add;
 )
 
-(
-// Recording synthdef with envelope
-SynthDef(\buffRecordEnv, {|input = 0, pLevel = 0.0, rLevel = 1.0, buffer|
-    var in = SoundIn.ar(input);
-	var env = EnvGen.ar(Env.asr(0.03, 1, 1, 1), 1, doneAction:2);
-
-    RecordBuf.ar(in * env, buffer, recLevel: rLevel, preLevel: pLevel, loop:0, run: 1, doneAction: Done.freeSelf);
-}).add;
-
-~looper.looperSynth = "buffRecordEnv";
-
-)
 
 ::

@@ -17,20 +17,20 @@ This procedure has the following reasons:
 
 To start the TidalLooper you first have to create a SuperDirt instance and then initialize the TidalLooper.
 
-```
+```c++
 ~dirt = SuperDirt(2, s);
 ~looper = TidalLooper(~dirt);
 ```
 
 You can adjust various parameters:
-```
+```c++
 ~looper.pLevel = 0.8;
 ```
 
 In SuperCollider you can also add the TidalLooper under `File -> Open startup script`
 and have it available after every server start.
 
-```
+```c++
 (
     s.waitForBoot {
         ~dirt = SuperDirt(2, s);
@@ -44,6 +44,7 @@ and have it available after every server start.
         ~looper.pLevel = 0.8;
         ~looper.linput = 15; // Set this to your main input port.
         ~looper.lname = "mybuffer";
+        ~looper.debugMode = true;
     }
 )
 ```
@@ -115,6 +116,12 @@ To reset all loop buffers just evaluate
 once $ s "freeLoops"
 ```
 
+To reset a specific buffer you need to add the buffer name and/or a buffer number
+
+```haskell
+once $ s "freeLoops" # lname "loop" # n "3"
+```
+
 To persist all loop buffers of a specific buffer list just evaluate
 
 ```haskell
@@ -133,7 +140,7 @@ In replace mode, each time the recording pattern is called, the specified buffer
 To continuously play back and record a loop, the code could looks like this
 
 ```haskell
-d1 $ qtrigger 1 $ stack [
+d1 $ qt $ stack [
     s "rlooper" # n "<0 1 2 3>",
     s "loop" # n "[0,1,2,3]",
     s "808 cp!3"
@@ -144,6 +151,25 @@ If you record a loop of cycle length 1 and play it back at the same time, you wi
 
 **Note:** You can change the default looper mode by changing the variable `pLevel` in the `Looper.scd`.
 
+### Single shot mode
+
+In single shot mode, the recording pattern for a buffer will only be applied once. Every time the looper will be executed to write on an existing buffer, nothin will happen. To use the looper in single shot mode you just need to use `slooper`. 
+
+```haskell
+d1 $ qt $ stack [
+    s "slooper" # n "0",
+    s "loop" # n "0",
+    s "808 cp!3"
+]
+```
+
+In combination with `freeLoops`, you can treat the single shot looper like a replace looper, where the replacement happens manually. This is useful to simulate a classic looper behavior, where you record multiple layers with a manual trigger. 
+
+```haskell
+d1 $ s "slooper" # n "0"
+once $ s "freeLoop" # lname "loop" # n "0" # orbit 0
+```
+
 ### Overdub mode
 
 Loop overdub - A  mode found in many looping devices where new material can be added on top of — overdubbed on — existing loop material. This allows you to layer additional parts into a loop to create a fuller sound or a more “layered” effect. (See https://www.sweetwater.com/insync/loop-overdub/)
@@ -153,7 +179,7 @@ In overdub mode, each time the recording pattern is called, the specified buffer
 To continuously play back and record a loop, the code could looks like this
 
 ```haskell
-d1 $ qtrigger 1 $ stack [s "olooper",s "loop",s "808 cp!3"]
+d1 $ qt $ stack [s "olooper",s "loop",s "808 cp!3"]
 ```
 
 **Note 1:** The buffer length of a buffer is set when recording for the first time and cannot be changed afterwards (unless you clear the buffer with `s "freeLoops"`) .
