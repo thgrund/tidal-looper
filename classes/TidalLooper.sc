@@ -222,6 +222,14 @@ TidalLooper {
 
 		};
 
+		synths[\persistLoops] = {
+			this.prMapTidalParameter;
+
+			[~lname].postln;
+
+			this.persistLoops.value(~lname);
+		};
+
 		^synths;
 	}
 
@@ -240,9 +248,11 @@ TidalLooper {
 		File.mkdir(abspath);
 
 		numBuffers.do({ |index|
-			dirt.soundLibrary.buffers[lname.asSymbol][index].write(
-				abspath ++ "/" + index ++ ".aiff"
-			)
+			if (dirt.soundLibrary.buffers[lname.asSymbol][index].numFrames > 0, {
+				dirt.soundLibrary.buffers[lname.asSymbol][index].write(
+					abspath ++ "/" + index ++ ".aiff"
+				);
+			});
 		})
 	}
 
