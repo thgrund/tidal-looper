@@ -50,6 +50,11 @@ and have it available after every server start.
 ```
 
 ## TidalCycles
+
+> [!NOTE]
+>
+> The following section is available as TidalCycles source code under `tidal/intro.tidal` as well.
+
 ### Pre-Requirement
 
 First you should execute the following tidal code:
@@ -96,10 +101,20 @@ And each buffer is accessible with the n function
 d2 $ s "loop" # n "[0,1,2,3,4,5,6,7]"
 ```
 
-You can use each input port for recording. If you use i.e. Blackhole, than the output and input ports have the same results. This way you can write the orbit results (i.e. what came from d1) to a buffer.
+You can use each available input port for recording. This way you can write the orbit results (i.e. what came from d1) to a buffer.
 
 ```haskell
-d1 $ s "looper" # linput 16
+d1 $ s "looper" # linput 13
+```
+
+You are able to switch between different input sources seamlessly with `recordSource`. There are two available options:
+
+- **in**: uses the input port of your sound card for recording
+- **out**: uses the synth bus of an orbit for recording. You can switch between orbits with `orbit`:
+
+```haskell
+d1 $ s "looper" # recordSource "out" # orbit 1 -- orbit 1 == d2
+d2 $ s "superpiano" # note "c'maj7'4"
 ```
 
 You can specifiy the name of your loop sample bank
@@ -153,7 +168,7 @@ If you record a loop of cycle length 1 and play it back at the same time, you wi
 
 ### Single shot mode
 
-In single shot mode, the recording pattern for a buffer will only be applied once. Every time the looper will be executed to write on an existing buffer, nothin will happen. To use the looper in single shot mode you just need to use `slooper`. 
+In single shot mode, the recording pattern for a buffer will only be applied once. Every time the looper will be executed to write on an existing buffer, nothin will happen. To use the looper in single shot mode you just need to use `slooper`.
 
 ```haskell
 d1 $ qt $ stack [
@@ -163,7 +178,7 @@ d1 $ qt $ stack [
 ]
 ```
 
-In combination with `freeLoops`, you can treat the single shot looper like a replace looper, where the replacement happens manually. This is useful to simulate a classic looper behavior, where you record multiple layers with a manual trigger. 
+In combination with `freeLoops`, you can treat the single shot looper like a replace looper, where the replacement happens manually. This is useful to simulate a classic looper behavior, where you record multiple layers with a manual trigger.
 
 ```haskell
 d1 $ s "slooper" # n "0"
