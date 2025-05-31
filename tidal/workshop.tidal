@@ -1,4 +1,5 @@
 -- Record in single shot mode
+do
 d1 $ sound "<[bd*2, hh*4, cr, ~ sn] ~>"
 d2 $ s "< slooper ~ >" # recordSource "out"
 d3 $ s "< ~ loop>"
