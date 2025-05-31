@@ -1,4 +1,10 @@
+-- Record in single shot mode
+d1 $ sound "<[bd*2, hh*4, cr, ~ sn] ~>"
+d2 $ s "< slooper ~ >" # recordSource "out"
+d3 $ s "< ~ loop>"
 
+-- once $ s "freeLoops" # n "0"
+           
 -- Record and replace output
 do
 d1 $ sound "<[bd*2, hh*4, cr, ~ sn] ~>"
