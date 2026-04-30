@@ -174,7 +174,7 @@ TidalLooper {
     			}.play;
 					Routine {
 						(~delta.value + 0.1).wait;
-						looperEndEvent.value();
+						looperEndEvent.value(env);
 
 						if (debugMode, {
 							format("Recording Stopped. [Looper type: % , buffer name: %,  position: %]\n", ~s, ~lname, ~n).post;
